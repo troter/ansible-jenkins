@@ -2,18 +2,24 @@
 
 ## Description
 
-*ansible-jenkins* is an [Ansible](http://ansible.cc) playbook.
-The playbook contains tasks to install Jenkins and install/update plugins.
+*ansible-jenkins* is an [Ansible](http://ansible.cc) role.
+Use this role to install Jenkins and install/update plugins.
 
 ## Requirements
 
 ### Ansible
 
-Everything is documented on the [Ansible](http://ansible.cc/docs/gettingstarted.html) site...
+Everything you should know about Ansible is documented on the [Ansible](http://ansible.cc/docs/gettingstarted.html) site...
 
 ### Supported platforms
 
-Playbook tested on *Debian-7.0-b4-amd64*, probably works on other Debian versions too. Heavily depends on *apt*, sorry CentOS users...
+#### Debian wheezy
+
+Playbook tested on *Debian-7.1*.
+
+#### Ansible >= 1.3
+
+Any Ansible version >= 1.3 should work. If not, please use the issue tracker to report any bugs.
 
 ## Usage
 
@@ -22,6 +28,8 @@ Playbook tested on *Debian-7.0-b4-amd64*, probably works on other Debian version
 ```bash
 $ git clone git@github.com:ICTO/ansible-jenkins.git
 ```
+
+The code should reside in the roles directory of ansible ( See [ansible documentation](http://www.ansibleworks.com/docs/playbooks.html#roles) for more information on roles ), in a folder jenkins.
 
 ### Create a host file
 
@@ -66,10 +74,20 @@ plugins:
 
 ### Run the playbook
 
+
+First create a playbook including the jenkins role, naming it jenkins.yml.
+
+```yml
+---
+- hosts: jenkins
+  roles:
+    - jenkins
+```
+
 Use *ansible.host* as inventory. Run the playbook only for the remote host *jenkins*. Use *vagrant* as the SSH user to connect to the remote host. *-k* enables the SSH password prompt.
 
 ```bash
-$ ansible-playbook -k -i ansible.host ansible-jenkins/setup.yml --extra-vars="user=vagrant"
+$ ansible-playbook -k -i ansible.host jenkins.yml --extra-vars="user=vagrant"
 ```
 
 ### Example output
@@ -77,58 +95,64 @@ $ ansible-playbook -k -i ansible.host ansible-jenkins/setup.yml --extra-vars="us
 ```
 SSH password: 
 
-PLAY [Jenkins playbook] ********************* 
+PLAY [jenkins] **************************************************************** 
 
-GATHERING FACTS ********************* 
+GATHERING FACTS *************************************************************** 
 ok: [127.0.0.1]
 
-TASK: [Install python-software-properties] ********************* 
+TASK: [Install python-software-properties] ************************************ 
 ok: [127.0.0.1]
 
-TASK: [Add jenkins apt-key] ********************* 
-ok: [127.0.0.1]
-
-TASK: [Add Jenkins repository] ********************* 
-ok: [127.0.0.1]
-
-TASK: [Remove invalid Jenkins src repository] ********************* 
+TASK: [Add jenkins apt-key] *************************************************** 
 changed: [127.0.0.1]
 
-TASK: [Install dependencies] ********************* 
-ok: [127.0.0.1] => (item=openjdk-6-jre,openjdk-6-jdk,git,curl)
+TASK: [Add Jenkins repository] ************************************************ 
+changed: [127.0.0.1]
 
-TASK: [Install Jenkins] ********************* 
+TASK: [Remove invalid Jenkins src repository] ********************************* 
+changed: [127.0.0.1]
+
+TASK: [Install dependencies] ************************************************** 
+changed: [127.0.0.1] => (item=openjdk-6-jre)
+changed: [127.0.0.1] => (item=openjdk-6-jdk)
+changed: [127.0.0.1] => (item=git)
+ok: [127.0.0.1] => (item=curl)
+
+TASK: [Install Jenkins] ******************************************************* 
+changed: [127.0.0.1]
+
+TASK: [10s delay while starting Jenkins] ************************************** 
 ok: [127.0.0.1]
 
-TASK: [10s delay while starting Jenkins] ********************* 
+TASK: [Create Jenkins CLI destination directory: /opt/jenkins] **************** 
+changed: [127.0.0.1]
+
+TASK: [Get Jenkins CLI] ******************************************************* 
+changed: [127.0.0.1]
+
+TASK: [Get Jenkins updates] *************************************************** 
+changed: [127.0.0.1]
+
+TASK: [Update-center Jenkins] ************************************************* 
+changed: [127.0.0.1]
+
+TASK: [List plugins] ********************************************************** 
 skipping: [127.0.0.1]
 
-TASK: [Create Jenkins CLI destination directory: /opt/jenkins] ********************* 
-ok: [127.0.0.1]
+TASK: [Install/update plugins] ************************************************ 
+skipping: [127.0.0.1] => (item=plugins)
 
-TASK: [Get Jenkins CLI] ********************* 
-ok: [127.0.0.1]
-
-TASK: [Get Jenkins updates] ********************* 
+TASK: [List plugins to be updated] ******************************************** 
 changed: [127.0.0.1]
 
-TASK: [Update-center Jenkins] ********************* 
+TASK: [Update plugins] ******************************************************** 
 changed: [127.0.0.1]
 
-TASK: [Install/update plugins] ********************* 
-changed: [127.0.0.1] => (item=ldap)
-changed: [127.0.0.1] => (item=github)
-changed: [127.0.0.1] => (item=translation)
-changed: [127.0.0.1] => (item=preSCMbuildstep)
-
-TASK: [10s delay while installing plugins] ********************* 
-ok: [127.0.0.1]
-
-TASK: [Safe-restart Jenkins] ********************* 
+NOTIFIED: [Restart Jenkins] *************************************************** 
 changed: [127.0.0.1]
 
-PLAY RECAP ********************* 
-127.0.0.1                   : ok=14   changed=5    unreachable=0    failed=0    
+PLAY RECAP ******************************************************************** 
+127.0.0.1              : ok=15   changed=7    unreachable=0    failed=0   
 ```
 
 ## Docs and contact
